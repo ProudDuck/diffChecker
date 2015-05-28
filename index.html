@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>svn diff checker</title>
+	<link rel="stylesheet" type="text/css" href="{{ static_url('bootstrap.css') }}">
+    </head>
+    <body>
+    <form method="post" action="/diff">
+	<select multiple name="revisions" size="50" style="width: 100%">
+	    {% for log in log_objects %}
+		<option value="{{ log.revision }}">{{ ' '.join([log.author, log.comment, log.date]) }}</option>
+	    {% end %}
+	</select>
+	<input type="submit">
+    </form>
+    </body>
+</html>
+
