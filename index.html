@@ -5,14 +5,33 @@
 	<link rel="stylesheet" type="text/css" href="{{ static_url('bootstrap.css') }}">
     </head>
     <body>
-    <form method="post" action="/diff">
-	<select multiple name="revisions" size="50" style="width: 100%">
-	    {% for log in log_objects %}
-		<option value="{{ log.revision }}">{{ ' '.join([log.author, log.comment, log.date]) }}</option>
-	    {% end %}
-	</select>
-	<input type="submit">
+    <form method="post" name="post_form" action="/fileDiff">
+        {% for change_list in change_lists %}
+            {{ change_list[0] }}
+            <ul>
+                {% for change in change_list[1] %}
+                    <li>
+                        <a href="javascript:void(0)" onclick='javascript:submit_file_diff("{{ change }}", "{{ change_list[0].revision }}");'>{{ change }}</a>
+                    </li>
+                {% end %}
+            </ul>
+        {% end %}
+        <input type="hidden" id="file_path" name="file_path" value="" />
+        <input type="hidden" id="revision" name="revision" value="" />
     </form>
     </body>
+
+    <script>
+        function submit_file_diff(file_path_str, revision_str) {
+            file_path = document.getElementById("file_path");
+            revision = document.getElementById("revision");
+
+            // in case for sentence like 'A /90source/trunk/platform-service/src/main/java/com/shuixing/emall/ui/platform/cms/entity/PlatformTemplate.java (from /90source/trunk/platform-service/src/main/java/com/shuixing/emall/ui/platform/cms/entity/DefinedTemplate.java:8021)'
+            file_path.value = file_path_str.split(' (from')[0];
+            revision.value = revision_str;
+
+            document.all.post_form.submit();
+        }
+    </script>
 </html>
 
