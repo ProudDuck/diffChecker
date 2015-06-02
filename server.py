@@ -18,9 +18,17 @@ define("port", default=8888, help="run on the given port", type=int)
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
+        self.render('index.html')
+
+class RevisionHandler(tornado.web.RequestHandler):
+    def get(self):
+        path = self.request.path[1:]
+        proj_path = svn_operator.PROJ_PATH_V1 if 'v1' == path else svn_operator.PROJ_PATH_V2
+
 	self.render(
-	    "index.html", 
-	    change_lists=svn_operator.each_change_list(svn_operator.extract_log_object())
+	    'revision.html', 
+            version=path,
+	    change_lists=svn_operator.each_change_list(svn_operator.extract_log_object(proj_path), proj_path)
 	)
 
 class DiffHandler(tornado.web.RequestHandler):
@@ -63,7 +71,7 @@ def diff2Html(diff_content):
 if __name__ == "__main__":
     tornado.options.parse_command_line()
     app = tornado.web.Application(
-	handlers=[(r"/", IndexHandler), (r'/diff', DiffHandler), (r'/fileDiff', FileDiffHandler)],
+	handlers=[(r"/", IndexHandler), (r"/v[1-2]", RevisionHandler), (r'/v[1-2]/fileDiff', FileDiffHandler)],
         static_path=os.path.join(os.path.dirname(__file__), "static")
     )
     http_server = tornado.httpserver.HTTPServer(app)

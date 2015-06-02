@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>svn diff checker</title>
+	<link rel="stylesheet" type="text/css" href="{{ static_url('bootstrap.css') }}">
+    </head>
+    <body>
+    <form method="post" name="post_form" action="{{ version }}/fileDiff">
+        {% for change_list in change_lists %}
+            {{ change_list[0] }}
+            <ul>
+                {% for change in change_list[1] %}
+                    <li>
+                        <a href="javascript:void(0)" onclick='javascript:submit_file_diff("{{ change }}", "{{ change_list[0].revision }}");'>{{ change }}</a>
+                    </li>
+                {% end %}
+            </ul>
+        {% end %}
+        <input type="hidden" id="file_path" name="file_path" value="" />
+        <input type="hidden" id="revision" name="revision" value="" />
+    </form>
+    </body>
+
+    <script>
+        function submit_file_diff(file_path_str, revision_str) {
+            file_path = document.getElementById("file_path");
+            revision = document.getElementById("revision");
+
+            // in case for sentence like 'A /90source/trunk/PlatformTemplate.java (from /90source/trunk/DefinedTemplate.java:8021)'
+            file_path.value = file_path_str.split(' (from')[0];
+            revision.value = revision_str;
+
+            document.all.post_form.submit();
+        }
+    </script>
+</html>
+
