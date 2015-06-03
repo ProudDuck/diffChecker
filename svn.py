@@ -38,6 +38,12 @@ def log_r1_r2(r1, r2, proj_path):
     log_command = 'svn log %s -r %s:%s -v' %(REPO + proj_path, r1, r2)
     return commands.getoutput(log_command)
 
+def change_list_r1_r2(r1, r2, proj_path):
+    diff_content = diff(r1, r2, proj_path)
+    change_list = [x.replace('Index: ', proj_path + '/') for x in re.compile(r'Index: .*').findall(diff_content)]
+
+    return change_list
+
 def log(proj_path):
     '''
         100 logs to HEAD
@@ -86,4 +92,4 @@ def each_change_list(log_content, proj_path):
     return sorted(change_lists.iteritems(), key=lambda d:d[0].revision, reverse=True)
 
 if __name__ == '__main__':
-    pass
+    print change_list_r1_r2('r8289', 'r8290', V2_PATH)
