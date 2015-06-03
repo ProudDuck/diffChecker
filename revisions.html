@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+        <title>svn diff checker</title>
+	<link rel="stylesheet" type="text/css" href="{{ static_url('bootstrap.css') }}">
+    </head>
+    <body>
+        <form method="post" name="post_form" action="compareRevisions/changes">
+            <ul>
+                {% for log_object in log_objects %}
+                    <li>
+                        <input type="checkbox" name="revisions" id="{{ log_object.revision }}" value="{{ log_object.revision }}"/>
+                        <a href="javascript:void(0)" onclick="clickLink('{{ log_object.revision }}')">{{ log_object }}</a>
+                    </li>
+                {% end %}
+            </ul>
+            <input style="position:fixed;bottom:0;left:800px;" type="submit" />
+        </form>
+    </body>
+
+    <script>
+        //var checked = Array.prototype.slice.call(document.getElementsByName('revisions')).filter(function(e) {return e.checked});
+        var checked = 0;
+
+        function clickLink(revision) {
+            var checkbox = document.getElementById(revision);
+
+            if (checkbox.checked) {
+                checkbox.click();
+                checked--;
+            } else if (checked < 2) {
+                checkbox.click();
+                checked++;
+            }
+        }
+    </script>
+</html>
+
