@@ -30,6 +30,10 @@ def run_svn_revision_log_command(revision, proj_path):
     change_list = re.compile(r'[AMD] \/.*').findall(output)
     return change_list
 
+def svn_log_r1_r2(proj_path, r1, r2):
+    log_command = 'svn log %s -r %s:%s -v' %(REPO + proj_path, r1, r2)
+    return unicode(commands.getoutput(log_command), 'utf-8')
+
 def run_svn_log_command(proj_path):
     log_limit = 100
 
@@ -45,8 +49,7 @@ def diff_specify_file(file_path, revision):
     log_command = 'svn diff -c %s %s' %(revision, REPO + file_path[2:])
     return commands.getoutput(log_command)
 
-def extract_log_object(proj_path):
-    log_content = run_svn_log_command(proj_path)
+def extract_log_object(proj_path, log_content):
     log_objects = []
     for log in log_content.split('-' * 72):
         if log != None:

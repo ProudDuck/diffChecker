@@ -5,7 +5,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ static_url('bootstrap.css') }}">
     </head>
     <body>
-    <form method="post" name="post_form" action="{{ version }}/fileDiff">
+    <form method="post" name="post_form" action="/{{ version }}/fileDiff">
         {% for change_list in change_lists %}
             {{ change_list[0] }}
             <ul>
