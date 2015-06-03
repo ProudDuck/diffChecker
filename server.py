@@ -23,11 +23,10 @@ class IndexHandler(tornado.web.RequestHandler):
 class RevisionHandler(tornado.web.RequestHandler):
     def get(self):
         version = self.request.path[1:]
-        proj_path = svn.PROJ_PATH_V1 if 'v1' == version else svn.PROJ_PATH_V2
+        proj_path = svn.V1_PATH if 'v1' == version else svn.V2_PATH
 
-        log_content = svn.run_svn_log_command(proj_path)
-        logs = svn.extract_log_object(proj_path, log_content)
-        change_lists = svn.each_change_list(logs, proj_path)
+        log_content = svn.log(proj_path)
+        change_lists = svn.each_change_list(log_content, proj_path)
 
 	self.render(
 	    'revision.html', 
@@ -37,9 +36,7 @@ class RevisionHandler(tornado.web.RequestHandler):
 
 class DiffHandler(tornado.web.RequestHandler):
     def post(self):
-        revisions = None
-        if (self.request.arguments.has_key('revisions')):
-            revisions = self.request.arguments['revisions']
+        revisions = self.request.arguments['revisions'] if self.request.arguments.has_key('revisions') else None
 
 	if revisions == None or len(revisions) != 2:
 	    self.write('only support select 2 revisions')   
@@ -48,11 +45,10 @@ class DiffHandler(tornado.web.RequestHandler):
 	revisions.sort()
 
         version = self.request.path[1:3]
-        proj_path = svn.PROJ_PATH_V1 if 'v1' == version else svn.PROJ_PATH_V2
+        proj_path = svn.V1_PATH if 'v1' == version else svn.V2_PATH
 
-        log_content = svn.svn_log_r1_r2(proj_path, revisions[0], revisions[1])
-        logs = svn.extract_log_object(proj_path, log_content)
-        change_lists = svn.each_change_list(logs, proj_path)
+        log_content = svn.log_r1_r2(revisions[0], revisions[1], proj_path)
+        change_lists = svn.each_change_list(log_content, proj_path)
 
 	self.render(
 	    'revision.html', 
@@ -65,7 +61,7 @@ class FileDiffHandler(tornado.web.RequestHandler):
         file_path = self.get_argument('file_path')
         revision = self.get_argument('revision')
 
-        diff_content = svn.diff_specify_file(file_path, revision)
+        diff_content = svn.file_diff(revision, file_path)
 
         diff_html = diff2Html(diff_content)
         self.write(diff_html)
@@ -73,10 +69,10 @@ class FileDiffHandler(tornado.web.RequestHandler):
 class CompareRevisionsHandler(tornado.web.RequestHandler):
     def get(self):
         version = self.request.path[1:3]
-        proj_path = svn.PROJ_PATH_V1 if 'v1' == version else svn.PROJ_PATH_V2
+        proj_path = svn.V1_PATH if 'v1' == version else svn.V2_PATH
 
-        log_content = svn.run_svn_log_command(proj_path)
-        logs = svn.extract_log_object(proj_path, log_content)
+        log_content = svn.log(proj_path)
+        logs = [x[0] for x in svn.each_change_list(log_content, proj_path)]
         self.render(
             'revisions.html',
             version=version,
@@ -90,7 +86,7 @@ def diff2Html(diff_content):
     diff_file.close()
 
     command = 'python diff2html.py -i %s -t %d -l %d' %(diff_file_name, 4, 160)
-    diff_html = commands.getoutput('python diff2html.py -i ' + diff_file_name + ' -t 4 -l 160')
+    diff_html = commands.getoutput(command)
 
     os.remove(diff_file_name)
 
